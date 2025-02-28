@@ -23,6 +23,8 @@ export default function CreateProduct() {
         post('/api/products');
     };
 
+    <>kjikasdj</>
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Crear Producto" />
