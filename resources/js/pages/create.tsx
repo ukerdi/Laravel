@@ -4,7 +4,7 @@ import { Head, useForm } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Crear Productos',
+        title: 'Creadddr Productos',
         href: '/create',
     },
 ];
