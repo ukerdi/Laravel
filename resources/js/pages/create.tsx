@@ -4,6 +4,7 @@ import { Head, useForm, router } from '@inertiajs/react';
 import { toast } from 'react-toastify'; // Importar toast
 import axios from 'axios'; // Importar axios
 import { useEffect, useState } from 'react';
+import { ClipLoader } from 'react-spinners'; // Importar spinner
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,17 +29,23 @@ export default function CreateProduct() {
     });
 
     const [tipos, setTipos] = useState<Tipo[]>([]);
+    const [loading, setLoading] = useState(true); // Estado de carga
 
     useEffect(() => {
         axios.get('/api/tipos')
             .then(response => {
                 setTipos(response.data);
+                setLoading(false); // Desactivar el estado de carga
             })
-            .catch(error => console.error('Error fetching tipos:', error));
+            .catch(error => {
+                console.error('Error fetching tipos:', error);
+                setLoading(false); // Desactivar el estado de carga
+            });
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true); // Activar el estado de carga
         
         const formData = new FormData();
         formData.append('name', data.name);
@@ -80,6 +87,9 @@ export default function CreateProduct() {
             } else {
                 console.error("Errores de validación:", error);
             }
+        })
+        .finally(() => {
+            setLoading(false); // Desactivar el estado de carga
         });
     };
 
@@ -89,98 +99,104 @@ export default function CreateProduct() {
             <div className="min-h-screen flex items-center justify-center bg-black">
                 <div className="w-full max-w-2xl p-6 bg-gray-800 rounded-lg shadow-md">
                     <h2 className="text-2xl font-semibold text-center text-white mb-6">Crear Producto</h2>
-                    <form onSubmit={handleSubmit} encType="multipart/form-data">
-                        <div className="mb-4">
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-300">Nombre</label>
-                            <input
-                                type="text"
-                                id="name"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                            />
-                            {errors.name && <div className="text-red-500 text-sm mt-1">{errors.name}</div>}
+                    {loading ? (
+                        <div className="flex justify-center items-center">
+                            <ClipLoader color="#ffffff" loading={loading} size={50} />
                         </div>
-                        <div className="mb-4">
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-300">Descripción</label>
-                            <textarea
-                                id="description"
-                                value={data.description}
-                                onChange={(e) => setData('description', e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                            />
-                            {errors.description && <div className="text-red-500 text-sm mt-1">{errors.description}</div>}
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="price" className="block text-sm font-medium text-gray-300">Precio</label>
-                            <input
-                                type="number"
-                                id="price"
-                                value={data.price}
-                                onChange={(e) => setData('price', e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                            />
-                            {errors.price && <div className="text-red-500 text-sm mt-1">{errors.price}</div>}
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="stock" className="block text-sm font-medium text-gray-300">Stock</label>
-                            <input
-                                type="number"
-                                id="stock"
-                                value={data.stock}
-                                onChange={(e) => setData('stock', e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                            />
-                            {errors.stock && <div className="text-red-500 text-sm mt-1">{errors.stock}</div>}
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="tipo_id" className="block text-sm font-medium text-gray-300">Tipo</label>
-                            <select
-                                id="tipo_id"
-                                value={data.tipo_id}
-                                onChange={(e) => setData('tipo_id', e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                            >
-                                <option value="">Seleccione un tipo</option>
-                                {tipos.map(tipo => (
-                                    <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
-                                ))}
-                            </select>
-                            {errors.tipo_id && <div className="text-red-500 text-sm mt-1">{errors.tipo_id}</div>}
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="image" className="block text-sm font-medium text-gray-300">Imagen</label>
-                            <input
-                                type="file"
-                                id="image"
-                                onChange={(e) => {
-                                    if (e.target.files && e.target.files[0]) {
-                                        setData('image', e.target.files[0]);
-                                    }
-                                }}
-                                className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                            />
-                            {errors.image && <div className="text-red-500 text-sm mt-1">{errors.image}</div>}
-                        </div>
-                        {data.image && (
-                            <div className="mb-4 flex justify-center">
-                                <img
-                                    src={URL.createObjectURL(data.image)}
-                                    alt="Previsualización de la imagen"
-                                    className="w-32 h-auto rounded-md"
+                    ) : (
+                        <form onSubmit={handleSubmit} encType="multipart/form-data">
+                            <div className="mb-4">
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-300">Nombre</label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    value={data.name}
+                                    onChange={(e) => setData('name', e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                                 />
+                                {errors.name && <div className="text-red-500 text-sm mt-1">{errors.name}</div>}
                             </div>
-                        )}
-                        <div className="flex justify-end">
-                            <button
-                                type="submit"
-                                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
-                                disabled={processing}
-                            >
-                                {processing ? 'Creando...' : 'Crear Producto'}
-                            </button>
-                        </div>
-                    </form>
+                            <div className="mb-4">
+                                <label htmlFor="description" className="block text-sm font-medium text-gray-300">Descripción</label>
+                                <textarea
+                                    id="description"
+                                    value={data.description}
+                                    onChange={(e) => setData('description', e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                />
+                                {errors.description && <div className="text-red-500 text-sm mt-1">{errors.description}</div>}
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="price" className="block text-sm font-medium text-gray-300">Precio</label>
+                                <input
+                                    type="number"
+                                    id="price"
+                                    value={data.price}
+                                    onChange={(e) => setData('price', e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                />
+                                {errors.price && <div className="text-red-500 text-sm mt-1">{errors.price}</div>}
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="stock" className="block text-sm font-medium text-gray-300">Stock</label>
+                                <input
+                                    type="number"
+                                    id="stock"
+                                    value={data.stock}
+                                    onChange={(e) => setData('stock', e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                />
+                                {errors.stock && <div className="text-red-500 text-sm mt-1">{errors.stock}</div>}
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="tipo_id" className="block text-sm font-medium text-gray-300">Tipo</label>
+                                <select
+                                    id="tipo_id"
+                                    value={data.tipo_id}
+                                    onChange={(e) => setData('tipo_id', e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                >
+                                    <option value="">Seleccione un tipo</option>
+                                    {tipos.map(tipo => (
+                                        <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
+                                    ))}
+                                </select>
+                                {errors.tipo_id && <div className="text-red-500 text-sm mt-1">{errors.tipo_id}</div>}
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="image" className="block text-sm font-medium text-gray-300">Imagen</label>
+                                <input
+                                    type="file"
+                                    id="image"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setData('image', e.target.files[0]);
+                                        }
+                                    }}
+                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                />
+                                {errors.image && <div className="text-red-500 text-sm mt-1">{errors.image}</div>}
+                            </div>
+                            {data.image && (
+                                <div className="mb-4 flex justify-center">
+                                    <img
+                                        src={URL.createObjectURL(data.image)}
+                                        alt="Previsualización de la imagen"
+                                        className="w-32 h-auto rounded-md"
+                                    />
+                                </div>
+                            )}
+                            <div className="flex justify-end">
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
+                                    disabled={processing}
+                                >
+                                    {processing ? 'Creando...' : 'Crear Producto'}
+                                </button>
+                            </div>
+                        </form>
+                    )}
                 </div>
             </div>
         </AppLayout>
