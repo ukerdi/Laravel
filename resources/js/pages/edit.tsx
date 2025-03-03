@@ -7,6 +7,10 @@ import { toast } from 'react-toastify'; // Importando toast
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
+        title: 'Gestión de Tienda',
+        href: '/dashboard',
+    },
+    {
         title: 'Editar Producto',
         href: '/edit',
     },

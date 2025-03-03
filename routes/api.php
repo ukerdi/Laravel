@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ClientController
 use App\Models\Product;
 
 // Grupo de rutas API
@@ -25,4 +26,11 @@ Route::middleware('api')->group(function () {
         }
         return response()->json($product, 200, ['Content-Type' => 'application/json']);
     });
+
+    // Rutas para los clientes
+    Route::get('clients', [ClientController::class, 'index']);
+    Route::get('clients/{id}', [ClientController::class, 'show']);
+    Route::post('clients', [ClientController::class, 'store']);
+    Route::put('clients/{id}', [ClientController::class, 'update']);
+    Route::delete('clients/{id}', [ClientController::class, 'destroy']);
 });

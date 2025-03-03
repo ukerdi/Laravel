@@ -4,55 +4,51 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, ShoppingCart, Users } from 'lucide-react'; // Añadido iconos de ventas y clientes
 import AppLogo from './app-logo';
-import { useState, useEffect } from 'react';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Inicio',
         url: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Subir Producto',
+        url: '/create',
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Clientes',
+        url: '/clientes',
+        icon: Users,
+    },
+    {
+        title: 'Ventas',
+        url: '/ventas',
+        icon: ShoppingCart,  // Se podría usar otro ícono para ventas si se prefiere
+    },
+    {
+        title: 'Marketing',
+        url: '/marketing',
+        icon: BookOpen,
     },
 ];
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
+        title: 'Repositorio',
         url: 'https://github.com/laravel/react-starter-kit',
         icon: Folder,
     },
     {
-        title: 'Documentation',
+        title: 'Documentación',
         url: 'https://laravel.com/docs/starter-kits',
         icon: BookOpen,
     },
 ];
 
-const productTypes = [
-    { label: 'Todos', value: '' },
-    { label: 'Electrónica', value: 'electronica' },
-    { label: 'Ropa', value: 'ropa' },
-    { label: 'Hogar', value: 'hogar' },
-];
-
-export function AppSidebar({ onFilterChange }: { onFilterChange: (filters: any) => void }) {
-    const [selectedType, setSelectedType] = useState('');
-    const [searchName, setSearchName] = useState('');
-    const [minPrice, setMinPrice] = useState('');
-    const [maxPrice, setMaxPrice] = useState('');
-    const [inStock, setInStock] = useState(false);
-
-    useEffect(() => {
-        onFilterChange({
-            type: selectedType,
-            name: searchName,
-            minPrice: minPrice,
-            maxPrice: maxPrice,
-            inStock: inStock,
-        });
-    }, [selectedType, searchName, minPrice, maxPrice, inStock]);
-
+export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -68,62 +64,18 @@ export function AppSidebar({ onFilterChange }: { onFilterChange: (filters: any) 
             </SidebarHeader>
 
             <SidebarContent>
-                <div className="p-4">
-                    <h3 className="text-lg font-semibold text-white mb-4">Filtros</h3>
-                    <div className="mb-4">
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-300">Tipo</label>
-                        <select 
-                            id="type" 
-                            value={selectedType} 
-                            onChange={(e) => setSelectedType(e.target.value)} 
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                        >
-                            {productTypes.map(type => (
-                                <option key={type.value} value={type.value}>{type.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="searchName" className="block text-sm font-medium text-gray-300">Buscar por nombre</label>
-                        <input 
-                            type="text" 
-                            id="searchName" 
-                            value={searchName} 
-                            onChange={(e) => setSearchName(e.target.value)} 
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="minPrice" className="block text-sm font-medium text-gray-300">Precio mínimo</label>
-                        <input 
-                            type="number" 
-                            id="minPrice" 
-                            value={minPrice} 
-                            onChange={(e) => setMinPrice(e.target.value)} 
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="maxPrice" className="block text-sm font-medium text-gray-300">Precio máximo</label>
-                        <input 
-                            type="number" 
-                            id="maxPrice" 
-                            value={maxPrice} 
-                            onChange={(e) => setMaxPrice(e.target.value)} 
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="inStock" className="block text-sm font-medium text-gray-300">En stock</label>
-                        <input 
-                            type="checkbox" 
-                            id="inStock" 
-                            checked={inStock} 
-                            onChange={(e) => setInStock(e.target.checked)} 
-                            className="mt-1"
-                        />
-                    </div>
-                </div>
+                <SidebarMenu>
+                    {mainNavItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                            <Link href={item.url} prefetch>
+                                <SidebarMenuButton>
+                                    {item.icon && <item.icon className="mr-2" />}
+                                    {item.title}
+                                </SidebarMenuButton>
+                            </Link>
+                        </SidebarMenuItem>
+                    ))}
+                </SidebarMenu>
             </SidebarContent>
 
             <SidebarFooter>
