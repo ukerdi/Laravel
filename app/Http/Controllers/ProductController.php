@@ -9,20 +9,19 @@ use Inertia\Inertia;
 
 class ProductController extends Controller {
     
-    // Obtener todos los productos
     public function index(Request $request) {
         if ($request->header('X-Inertia')) {
             return Inertia::render('Dashboard', [
-                'products' => Product::all(),
+                'productos' => Product::with('tipo')->get(),
             ]);
         }
 
-        return response()->json(Product::all(), 200, ['Content-Type' => 'application/json']);
+        return response()->json(Product::with('tipo')->get(), 200, ['Content-Type' => 'application/json']);
     }
 
     // Obtener un solo producto
     public function show($id) {
-        $product = Product::find($id);
+        $product = Product::with('tipo')->find($id);
         if (!$product) {
             return response()->json(['message' => 'Producto no encontrado'], 404);
         }
@@ -36,6 +35,7 @@ class ProductController extends Controller {
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'tipo_id' => 'nullable|exists:tipos,id',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048'
         ]);
 
@@ -50,6 +50,7 @@ class ProductController extends Controller {
             'description' => $request->description,
             'price' => $request->price,
             'stock' => $request->stock,
+            'tipo_id' => $request->tipo_id,
             'image' => $imagePath
         ]);
 
@@ -77,6 +78,7 @@ class ProductController extends Controller {
             'description' => 'nullable|string',
             'price' => 'numeric|min:0',
             'stock' => 'integer|min:0',
+            'tipo_id' => 'nullable|exists:tipos,id',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048'
         ]);
 

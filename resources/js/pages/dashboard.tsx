@@ -22,15 +22,9 @@ interface Product {
     price: number;
     stock: number;
     image: string | null;
-    type: string;
-}
-
-const productTypes = [
-    { label: 'Todos', value: '' },
-    { label: 'Electrónica', value: 'electronica' },
-    { label: 'Ropa', value: 'ropa' },
-    { label: 'Hogar', value: 'hogar' },
-];
+    tipo: {
+        nombre: string;
+    } | null;}
 
 export default function Dashboard() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -80,7 +74,7 @@ export default function Dashboard() {
         let filtered = products;
 
         if (selectedType) {
-            filtered = filtered.filter(product => product.type === selectedType);
+            filtered = filtered.filter(product => product.tipo?.nombre === selectedType);
         }
 
         if (searchName) {
@@ -105,9 +99,14 @@ export default function Dashboard() {
                                     onChange={(e) => setSelectedType(e.target.value)} 
                                     className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                                 >
-                                    {productTypes.map(type => (
-                                        <option key={type.value} value={type.value}>{type.label}</option>
-                                    ))}
+                                    <option value="">Todos</option>
+                                    {products
+                                        .map(product => product.tipo?.nombre)
+                                        .filter((value, index, self) => value && self.indexOf(value) === index)
+                                        .map((tipo, index) => (
+                                            <option key={index} value={tipo}>{tipo}</option>
+                                        ))
+                                    }
                                 </select>
                             </div>
                             <div className="flex flex-col">
@@ -143,6 +142,7 @@ export default function Dashboard() {
                                     <span className={`mt-2 text-sm ${product.stock > 0 ? "text-green-400" : "text-red-400"}`}>
                                         {product.stock > 0 ? `Stock: ${product.stock}` : "Agotado"}
                                     </span>
+                                    <p className="text-gray-400 text-sm mt-2">Tipo: {product.tipo?.nombre || 'N/A'}</p>
                                     <p className="text-gray-400 text-sm mt-2">ID: {product.id}</p>
                                     <div className="flex gap-2 mt-4">
                                         <button 

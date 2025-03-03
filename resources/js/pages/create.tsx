@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { toast } from 'react-toastify'; // Importar toast
 import axios from 'axios'; // Importar axios
+import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,14 +12,30 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+interface Tipo {
+    id: number;
+    nombre: string;
+}
+
 export default function CreateProduct() {
     const { data, setData, post, errors, processing } = useForm({
         name: '',
         description: '',
         price: '',
         stock: '',
+        tipo_id: '',
         image: null as File | null,
     });
+
+    const [tipos, setTipos] = useState<Tipo[]>([]);
+
+    useEffect(() => {
+        axios.get('/api/tipos')
+            .then(response => {
+                setTipos(response.data);
+            })
+            .catch(error => console.error('Error fetching tipos:', error));
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,6 +45,7 @@ export default function CreateProduct() {
         formData.append('description', data.description);
         formData.append('price', data.price.toString());
         formData.append('stock', data.stock.toString());
+        formData.append('tipo_id', data.tipo_id);
         if (data.image) {
             formData.append('image', data.image);
         }
@@ -114,6 +132,21 @@ export default function CreateProduct() {
                                 className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                             />
                             {errors.stock && <div className="text-red-500 text-sm mt-1">{errors.stock}</div>}
+                        </div>
+                        <div className="mb-4">
+                            <label htmlFor="tipo_id" className="block text-sm font-medium text-gray-300">Tipo</label>
+                            <select
+                                id="tipo_id"
+                                value={data.tipo_id}
+                                onChange={(e) => setData('tipo_id', e.target.value)}
+                                className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                            >
+                                <option value="">Seleccione un tipo</option>
+                                {tipos.map(tipo => (
+                                    <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
+                                ))}
+                            </select>
+                            {errors.tipo_id && <div className="text-red-500 text-sm mt-1">{errors.tipo_id}</div>}
                         </div>
                         <div className="mb-4">
                             <label htmlFor="image" className="block text-sm font-medium text-gray-300">Imagen</label>

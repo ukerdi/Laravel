@@ -5,10 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model {
+class Product extends Model
+{
     use HasFactory;
 
-    protected $table = 'productos';
+    protected $table = 'productos'; // Especificar la tabla 'productos'
 
-    protected $fillable = ['name', 'description', 'price', 'stock', 'image'];
+    protected $fillable = [
+        'name',
+        'description',
+        'price',
+        'stock',
+        'tipo_id',
+        'image',
+    ];
+
+    public function tipo()
+    {
+        return $this->belongsTo(Tipo::class);
+    }
 }

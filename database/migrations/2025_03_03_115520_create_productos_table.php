@@ -11,9 +11,11 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->integer('stock')->default(0);
-            $table->string('image')->nullable(); // Ruta de la imagen
+            $table->decimal('price', 8, 2);
+            $table->integer('stock');
+            $table->unsignedBigInteger('tipo_id')->nullable();
+            $table->foreign('tipo_id')->references('id')->on('tipos')->onDelete('set null');
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }
@@ -23,4 +25,3 @@ return new class extends Migration {
         Schema::dropIfExists('productos');
     }
 };
-

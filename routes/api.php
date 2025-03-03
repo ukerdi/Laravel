@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ClientController
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\TipoController; // Importar el controlador de tipos
 use App\Models\Product;
 
 // Grupo de rutas API
@@ -33,4 +34,7 @@ Route::middleware('api')->group(function () {
     Route::post('clients', [ClientController::class, 'store']);
     Route::put('clients/{id}', [ClientController::class, 'update']);
     Route::delete('clients/{id}', [ClientController::class, 'destroy']);
+
+    // Ruta para obtener los tipos
+    Route::get('tipos', [TipoController::class, 'index']);
 });
