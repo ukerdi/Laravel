@@ -1,6 +1,8 @@
 import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
+import { toast } from 'react-toastify'; // Importar toast
+import axios from 'axios'; // Importar axios
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -10,7 +12,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function CreateProduct() {
-    const { data, setData, post, errors } = useForm({
+    const { data, setData, post, errors, processing } = useForm({
         name: '',
         description: '',
         price: '',
@@ -20,10 +22,48 @@ export default function CreateProduct() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/api/products');
-    };
+        
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('description', data.description);
+        formData.append('price', data.price.toString());
+        formData.append('stock', data.stock.toString());
+        if (data.image) {
+            formData.append('image', data.image);
+        }
 
-    <>kjikasdj</>
+        axios.post('/api/products', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then((response: { data: any }) => {
+            console.log("Producto creado:", response.data);
+            // Mostrar toast de éxito
+            toast.success('Producto creado correctamente', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
+            // Redireccionar al dashboard después de una creación exitosa
+            router.visit('/dashboard');
+        })
+        .catch((error: any) => {
+            if (error.response && error.response.data && error.response.data.errors) {
+                const validationErrors = error.response.data.errors;
+                Object.keys(validationErrors).forEach((key) => {
+                    setData(key as keyof typeof data, validationErrors[key][0]);
+                });
+            } else {
+                console.error("Errores de validación:", error);
+            }
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -31,7 +71,7 @@ export default function CreateProduct() {
             <div className="min-h-screen flex items-center justify-center bg-black">
                 <div className="w-full max-w-2xl p-6 bg-gray-800 rounded-lg shadow-md">
                     <h2 className="text-2xl font-semibold text-center text-white mb-6">Crear Producto</h2>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} encType="multipart/form-data">
                         <div className="mb-4">
                             <label htmlFor="name" className="block text-sm font-medium text-gray-300">Nombre</label>
                             <input
@@ -89,12 +129,22 @@ export default function CreateProduct() {
                             />
                             {errors.image && <div className="text-red-500 text-sm mt-1">{errors.image}</div>}
                         </div>
+                        {data.image && (
+                            <div className="mb-4 flex justify-center">
+                                <img
+                                    src={URL.createObjectURL(data.image)}
+                                    alt="Previsualización de la imagen"
+                                    className="w-32 h-auto rounded-md"
+                                />
+                            </div>
+                        )}
                         <div className="flex justify-end">
                             <button
                                 type="submit"
                                 className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
+                                disabled={processing}
                             >
-                                Crear Producto
+                                {processing ? 'Creando...' : 'Crear Producto'}
                             </button>
                         </div>
                     </form>

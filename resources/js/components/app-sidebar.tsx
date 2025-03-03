@@ -59,24 +59,6 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <div className="p-4">
-                    <label htmlFor="product-type" className="block text-sm font-medium text-gray-700">
-                        Filtrar por tipo de producto
-                    </label>
-                    <select
-                        id="product-type"
-                        name="product-type"
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                        value={selectedType}
-                        onChange={handleTypeChange}
-                    >
-                        {productTypes.map((type) => (
-                            <option key={type.value} value={type.value}>
-                                {type.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
                 <NavMain items={mainNavItems} />
             </SidebarContent>
 
