@@ -88,7 +88,7 @@ export default function Dashboard() {
                                 )}
                                 <h2 className="text-lg font-semibold text-center text-white">{product.name}</h2>
                                 <p className="text-gray-400 text-sm text-center mt-2">{product.description}</p>
-                                <p className="text-yellow-400 text-lg font-bold mt-2">${product.price.toFixed(2)}</p>
+                                <p className="text-yellow-400 text-lg font-bold mt-2">{product.price.toFixed(2)} €</p>
                                 <span className={`mt-2 text-sm ${product.stock > 0 ? "text-green-400" : "text-red-400"}`}>
                                     {product.stock > 0 ? `Stock: ${product.stock}` : "Agotado"}
                                 </span>
