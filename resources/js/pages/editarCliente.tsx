@@ -5,6 +5,7 @@ import { Head, usePage, router } from '@inertiajs/react';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
+import Spinner from '@/components/spinner'; // Importar Spinner
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -32,6 +33,7 @@ export default function EditarClientePage() {
     const [email, setEmail] = useState('');
     const [telefono, setTelefono] = useState('');
     const [direccion, setDireccion] = useState('');
+    const [loading, setLoading] = useState(true); // Estado de carga
 
     useEffect(() => {
         axios.get(`/api/clients/${id}`)
@@ -42,12 +44,17 @@ export default function EditarClientePage() {
                 setEmail(clienteData.email);
                 setTelefono(clienteData.telefono || '');
                 setDireccion(clienteData.direccion || '');
+                setLoading(false); // Desactivar el estado de carga
             })
-            .catch(error => console.error('Error fetching client:', error));
+            .catch(error => {
+                console.error('Error fetching client:', error);
+                setLoading(false); // Desactivar el estado de carga
+            });
     }, [id]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true); // Activar el estado de carga
         axios.put(`/api/clients/${id}`, { nombre, email, telefono, direccion })
             .then(() => {
                 toast.success('Cliente actualizado con éxito', {
@@ -74,11 +81,14 @@ export default function EditarClientePage() {
                     progress: undefined,
                     theme: "colored",
                 });
+            })
+            .finally(() => {
+                setLoading(false); // Desactivar el estado de carga
             });
     };
 
-    if (!cliente) {
-        return <p>Cargando...</p>;
+    if (loading) {
+        return <Spinner />;
     }
 
     return (

@@ -1,10 +1,10 @@
 import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Head, useForm, router } from '@inertiajs/react';
-import { toast } from 'react-toastify'; // Importar toast
-import axios from 'axios'; // Importar axios
+import { toast } from 'react-toastify';
+import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { ClipLoader } from 'react-spinners'; // Importar spinner
+import Spinner from '@/components/spinner'; // Importar spinner
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -25,7 +25,7 @@ export default function CreateProduct() {
         price: '',
         stock: '',
         tipo_id: '',
-        image: null as File | null,
+        images: [] as File[], // Cambiar de 'image' a 'images' para permitir múltiples archivos
     });
 
     const [tipos, setTipos] = useState<Tipo[]>([]);
@@ -44,8 +44,8 @@ export default function CreateProduct() {
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
+        setLoading(true);
         e.preventDefault();
-        setLoading(true); // Activar el estado de carga
         
         const formData = new FormData();
         formData.append('name', data.name);
@@ -53,9 +53,11 @@ export default function CreateProduct() {
         formData.append('price', data.price.toString());
         formData.append('stock', data.stock.toString());
         formData.append('tipo_id', data.tipo_id);
-        if (data.image) {
-            formData.append('image', data.image);
-        }
+        
+        // Añadir todas las imágenes al formData
+        data.images.forEach((image, index) => {
+            formData.append('images[]', image);
+        });
 
         axios.post('/api/products', formData, {
             headers: {
@@ -64,7 +66,6 @@ export default function CreateProduct() {
         })
         .then((response: { data: any }) => {
             console.log("Producto creado:", response.data);
-            // Mostrar toast de éxito
             toast.success('Producto creado correctamente', {
                 position: "top-right",
                 autoClose: 2000,
@@ -75,7 +76,6 @@ export default function CreateProduct() {
                 progress: undefined,
                 theme: "colored",
             });
-            // Redireccionar al dashboard después de una creación exitosa
             router.visit('/dashboard');
         })
         .catch((error: any) => {
@@ -93,6 +93,13 @@ export default function CreateProduct() {
         });
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const filesArray = Array.from(e.target.files);
+            setData('images', filesArray); // Guardar todas las imágenes seleccionadas
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Crear Producto" />
@@ -100,9 +107,7 @@ export default function CreateProduct() {
                 <div className="w-full max-w-2xl p-6 bg-gray-800 rounded-lg shadow-md">
                     <h2 className="text-2xl font-semibold text-center text-white mb-6">Crear Producto</h2>
                     {loading ? (
-                        <div className="flex justify-center items-center">
-                            <ClipLoader color="#ffffff" loading={loading} size={50} />
-                        </div>
+                        <Spinner />
                     ) : (
                         <form onSubmit={handleSubmit} encType="multipart/form-data">
                             <div className="mb-4">
@@ -164,26 +169,26 @@ export default function CreateProduct() {
                                 {errors.tipo_id && <div className="text-red-500 text-sm mt-1">{errors.tipo_id}</div>}
                             </div>
                             <div className="mb-4">
-                                <label htmlFor="image" className="block text-sm font-medium text-gray-300">Imagen</label>
+                                <label htmlFor="images" className="block text-sm font-medium text-gray-300">Imágenes</label>
                                 <input
                                     type="file"
-                                    id="image"
-                                    onChange={(e) => {
-                                        if (e.target.files && e.target.files[0]) {
-                                            setData('image', e.target.files[0]);
-                                        }
-                                    }}
+                                    id="images"
+                                    onChange={handleImageChange}
                                     className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                    multiple
                                 />
-                                {errors.image && <div className="text-red-500 text-sm mt-1">{errors.image}</div>}
+                                {errors.images && <div className="text-red-500 text-sm mt-1">{errors.images}</div>}
                             </div>
-                            {data.image && (
-                                <div className="mb-4 flex justify-center">
-                                    <img
-                                        src={URL.createObjectURL(data.image)}
-                                        alt="Previsualización de la imagen"
-                                        className="w-32 h-auto rounded-md"
-                                    />
+                            {data.images.length > 0 && (
+                                <div className="mb-4 flex flex-wrap justify-center">
+                                    {data.images.map((image, index) => (
+                                        <img
+                                            key={index}
+                                            src={URL.createObjectURL(image)}
+                                            alt={`Previsualización de la imagen ${index + 1}`}
+                                            className="w-32 h-auto rounded-md mx-2 my-2"
+                                        />
+                                    ))}
                                 </div>
                             )}
                             <div className="flex justify-end">

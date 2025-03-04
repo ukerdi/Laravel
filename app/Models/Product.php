@@ -17,7 +17,7 @@ class Product extends Model
         'price',
         'stock',
         'tipo_id',
-        'image',
+        'images', // Cambiar 'image' a 'images'
     ];
 
     public function tipo()
