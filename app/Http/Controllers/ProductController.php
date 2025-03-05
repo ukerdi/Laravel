@@ -98,13 +98,27 @@ class ProductController extends Controller {
     if ($request->hasFile('images')) {
         $newImages = [];
         foreach ($request->file('images') as $image) {
-            $path = $image->store('public/productos');
+            $path = $image->store('productos', 'public');
             $relativePath = str_replace('public/', '', $path);
             $newImages[] = $relativePath;
         }
         
         // Combinar imágenes existentes con nuevas
         $currentImages = array_merge($currentImages, $newImages);
+    }
+    
+    // Procesar el orden de las imágenes si se ha enviado
+    if ($request->has('images_order')) {
+        $orderedImages = json_decode($request->input('images_order'));
+        if (is_array($orderedImages) && count($orderedImages) > 0) {
+            // Usar directamente el array ordenado de imágenes
+            $currentImages = $orderedImages;
+            
+            // Establecer la primera imagen como imagen principal
+            if (!empty($orderedImages)) {
+                $product->image = $orderedImages[0];
+            }
+        }
     }
     
     // Guardar array de imágenes actualizado

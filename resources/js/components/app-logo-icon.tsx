@@ -1,8 +1,45 @@
 import { ImgHTMLAttributes } from 'react';
-import logo from '@/images/logo.png'; // Asegúrate de que la ruta sea correcta
+import { cn } from '@/lib/utils';
 
-export default function AppLogoIcon(props: ImgHTMLAttributes<HTMLImageElement>) {
+interface AppLogoIconProps extends ImgHTMLAttributes<HTMLImageElement> {
+  containerClassName?: string;
+  withContainer?: boolean;
+}
+
+export default function AppLogoIcon({
+  className,
+  containerClassName,
+  withContainer = false,
+  alt = "App Logo",
+  ...props
+}: AppLogoIconProps) {
+  // La ruta correcta para imágenes en Laravel cuando están en el storage público
+  const logoSrc = '/storage/images/logo.png';
+  
+  // Si se solicita con contenedor
+  if (withContainer) {
     return (
-        <img src={logo} alt="App Logo" {...props} />
+      <div className={cn(
+        "bg-indigo-600/20 rounded-full flex items-center justify-center",
+        containerClassName
+      )}>
+        <img 
+          src={logoSrc} 
+          alt={alt} 
+          className={cn("object-contain", className)} 
+          {...props} 
+        />
+      </div>
     );
+  }
+  
+  // Sin contenedor
+  return (
+    <img 
+      src={logoSrc} 
+      alt={alt} 
+      className={className} 
+      {...props} 
+    />
+  );
 }

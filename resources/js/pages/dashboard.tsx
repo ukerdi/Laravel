@@ -7,8 +7,9 @@ import { router } from '@inertiajs/react';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
-import Spinner from '@/components/spinner'; // Importar spinner
+import Spinner from '@/components/spinner';
 import ProductImageCarousel from '@/components/carrusel';
+import { ChevronLeft, ChevronRight } from 'lucide-react'; // Importar iconos para paginación
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -23,11 +24,13 @@ interface Product {
     description: string;
     price: number;
     stock: number;
-    images: string[] | null; // Cambiar 'image' a 'images'
+    images: string[] | null;
     tipo: {
         nombre: string;
     } | null;
 }
+
+const ITEMS_PER_PAGE = 8; // Constante para número de productos por página
 
 export default function Dashboard() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -35,12 +38,17 @@ export default function Dashboard() {
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
     const [selectedType, setSelectedType] = useState('');
     const [searchName, setSearchName] = useState('');
-    const [loading, setLoading] = useState(true); // Estado de carga
+    const [loading, setLoading] = useState(true);
+    
+    // Estados para paginación
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [paginatedProducts, setPaginatedProducts] = useState<Product[]>([]);
 
     useEffect(() => {
         axios.get("/api/products")
             .then(response => {
-                console.log(response.data); // <-- Agregar esto para verificar
+                console.log(response.data);
                 setProducts(response.data);
                 setFilteredProducts(response.data);
                 setLoading(false);
@@ -51,13 +59,28 @@ export default function Dashboard() {
             });
     }, []);
     
-
     useEffect(() => {
         handleFilterChange();
-    }, [selectedType, searchName ]);
+    }, [selectedType, searchName]);
+
+    // Efecto para manejar la paginación cuando cambian los productos filtrados o la página actual
+    useEffect(() => {
+        const total = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+        setTotalPages(total);
+        
+        // Asegurarse de que la página actual es válida
+        if (currentPage > total && total > 0) {
+            setCurrentPage(1);
+        }
+        
+        // Calcular los productos para la página actual
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        setPaginatedProducts(filteredProducts.slice(startIndex, endIndex));
+    }, [filteredProducts, currentPage]);
 
     const deleteProduct = (id: number) => {
-        setLoading(true); // Activar el estado de carga
+        setLoading(true);
         axios.delete(`/api/products/${id}`)
             .then(() => {
                 setProducts(products.filter(product => product.id !== id));
@@ -93,6 +116,99 @@ export default function Dashboard() {
             filtered = filtered.filter(product => product.name.toLowerCase().includes(searchName.toLowerCase()));
         }
         setFilteredProducts(filtered);
+        setCurrentPage(1); // Resetear a la primera página cuando cambian los filtros
+    };
+
+    // Funciones para paginación
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const goToPage = (pageNumber: number) => {
+        if (pageNumber >= 1 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
+        }
+    };
+
+    // Generar los botones de página
+    const renderPaginationButtons = () => {
+        const buttons = [];
+        
+        // Mostrar máximo 5 botones de página
+        const maxButtons = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+        let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+        
+        if (endPage - startPage + 1 < maxButtons) {
+            startPage = Math.max(1, endPage - maxButtons + 1);
+        }
+
+        // Botón para primera página si estamos alejados
+        if (startPage > 1) {
+            buttons.push(
+                <button 
+                    key="first" 
+                    onClick={() => goToPage(1)} 
+                    className="px-3 py-1 mx-1 bg-gray-800 rounded text-gray-300 hover:bg-gray-700"
+                >
+                    1
+                </button>
+            );
+            
+            // Mostrar puntos suspensivos si hay un salto
+            if (startPage > 2) {
+                buttons.push(
+                    <span key="ellipsis1" className="px-2 py-1 text-gray-500">...</span>
+                );
+            }
+        }
+
+        // Generar botones de página
+        for (let i = startPage; i <= endPage; i++) {
+            buttons.push(
+                <button 
+                    key={i} 
+                    onClick={() => goToPage(i)} 
+                    className={`px-3 py-1 mx-1 rounded ${
+                        currentPage === i 
+                            ? 'bg-indigo-600 text-white' 
+                            : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    }`}
+                >
+                    {i}
+                </button>
+            );
+        }
+
+        // Botón para última página si estamos alejados
+        if (endPage < totalPages) {
+            // Mostrar puntos suspensivos si hay un salto
+            if (endPage < totalPages - 1) {
+                buttons.push(
+                    <span key="ellipsis2" className="px-2 py-1 text-gray-500">...</span>
+                );
+            }
+            
+            buttons.push(
+                <button 
+                    key="last" 
+                    onClick={() => goToPage(totalPages)} 
+                    className="px-3 py-1 mx-1 bg-gray-800 rounded text-gray-300 hover:bg-gray-700"
+                >
+                    {totalPages}
+                </button>
+            );
+        }
+
+        return buttons;
     };
 
     return (
@@ -137,9 +253,20 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                             </div>
+                            
+                            {/* Información de paginación en formato texto */}
+                            <div className="flex justify-between items-center mb-4">
+                                <p className="text-gray-400 text-sm">
+                                    Mostrando {paginatedProducts.length} de {filteredProducts.length} productos
+                                </p>
+                                <p className="text-gray-400 text-sm">
+                                    Página {currentPage} de {totalPages || 1}
+                                </p>
+                            </div>
+                            
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {filteredProducts.length > 0 ? (
-                                    filteredProducts.map(product => (
+                                {paginatedProducts.length > 0 ? (
+                                    paginatedProducts.map(product => (
                                         <div key={product.id} className="bg-gray-800 border border-gray-700 rounded-lg shadow-md p-4 flex flex-col items-center">
                                             {product.images && product.images.length > 0 ? (
                                                     <ProductImageCarousel images={product.images} productName={product.name} />
@@ -196,6 +323,39 @@ export default function Dashboard() {
                                     <p className="col-span-full text-center text-gray-400">No hay productos disponibles</p>
                                 )}
                             </div>
+                            
+                            {/* Controles de paginación */}
+                            {totalPages > 1 && (
+                                <div className="mt-8 flex justify-center items-center">
+                                    <button 
+                                        onClick={goToPreviousPage} 
+                                        disabled={currentPage === 1}
+                                        className={`p-2 rounded-full mr-2 ${
+                                            currentPage === 1 
+                                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                                                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                                        }`}
+                                    >
+                                        <ChevronLeft size={20} />
+                                    </button>
+                                    
+                                    <div className="flex">
+                                        {renderPaginationButtons()}
+                                    </div>
+                                    
+                                    <button 
+                                        onClick={goToNextPage} 
+                                        disabled={currentPage === totalPages}
+                                        className={`p-2 rounded-full ml-2 ${
+                                            currentPage === totalPages 
+                                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                                                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                                        }`}
+                                    >
+                                        <ChevronRight size={20} />
+                                    </button>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
