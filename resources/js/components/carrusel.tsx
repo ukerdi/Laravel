@@ -44,7 +44,6 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ images, pro
 
   // Procesar las imágenes cuando cambia el prop
   useEffect(() => {
-    
     if (!images) {
       setImageArray([]);
       return;
@@ -72,7 +71,6 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ images, pro
 
   // Función para construir la URL correcta de la imagen
   const getImageUrl = (image: string): string => {
-    
     // Si la imagen empieza con http o https o data:, ya es una URL completa
     if (image.startsWith('http') || image.startsWith('https') || image.startsWith('data:')) {
       return image;
@@ -90,15 +88,14 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ images, pro
   // Si no hay imágenes
   if (imageArray.length === 0) {
     return (
-      <div className="w-40 h-40 bg-gray-600 flex items-center justify-center rounded-md mb-4"
-          style={{ width: '160px', height: '160px' }}>
-          <span className="text-gray-300">Sin imagen</span>
+      <div className="w-40 h-40 bg-gray-600 flex items-center justify-center rounded-md mb-4">
+        <span className="text-gray-300">Sin imagen</span>
       </div>
     );
   }
 
   return (
-    <div style={{ width: '160px', height: '160px', marginBottom: '16px' }}>
+    <div className="w-40 h-40 mb-4">
       <Swiper
         modules={[Navigation, Pagination]}
         navigation
@@ -111,22 +108,11 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ images, pro
           
           return (
             <SwiperSlide key={index}>
-              <div style={{ 
-                width: '160px', 
-                height: '160px', 
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}>
+              <div className="w-40 h-40 flex justify-center items-center">
                 <img 
                   src={imageUrl}
                   alt={`${productName} - imagen ${index + 1}`}
-                  style={{ 
-                    width: '160px', 
-                    height: '160px', 
-                    objectFit: 'cover',
-                    borderRadius: '8px'
-                  }}
+                  className="w-full h-full object-cover rounded-md"
                   onError={(e) => {
                     console.error(`Error cargando imagen: ${imageUrl}`);
                     e.currentTarget.onerror = null;

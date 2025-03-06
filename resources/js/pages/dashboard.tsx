@@ -270,13 +270,14 @@ export default function Dashboard() {
                                     paginatedProducts.map(product => (
                                         <div key={product.id} className="bg-gray-800 border border-gray-700 rounded-lg shadow-md p-4 flex flex-col items-center">
                                             {product.images && product.images.length > 0 ? (
+                                                <div className="w-full h-40 flex items-center justify-center mb-4">
                                                     <ProductImageCarousel images={product.images} productName={product.name} />
-                                                ) : (
-                                                    <div className="w-40 h-40 bg-gray-600 flex items-center justify-center rounded-md mb-4"
-                                                        style={{ width: '160px', height: '160px' }}>
-                                                        <span className="text-gray-300">Sin imagen</span>
-                                                    </div>
-                                                )}
+                                                </div>
+                                            ) : (
+                                                <div className="w-full h-40 bg-gray-600 flex items-center justify-center rounded-md mb-4">
+                                                    <span className="text-gray-300">Sin imagen</span>
+                                                </div>
+                                            )}
                                             <h2 className="text-lg font-semibold text-center text-white">{product.name}</h2>
                                             <p className="text-gray-400 text-sm text-center mt-2">{product.description}</p>
                                             <p className="text-yellow-400 text-lg font-bold mt-2">{product.price.toFixed(2)} €</p>
