@@ -22,11 +22,6 @@ interface Tipo {
     nombre: string;
 }
 
-// Eliminar estos comentarios ya que no usaremos estas bibliotecas
-// // Primero, instala react-beautiful-dnd:
-// // npm install react-beautiful-dnd
-// // npm install @types/react-beautiful-dnd --save-dev
-
 export default function CreateProduct() {
     const { data, setData, post, errors, processing } = useForm({
         name: '',
@@ -40,7 +35,6 @@ export default function CreateProduct() {
     const [tipos, setTipos] = useState<Tipo[]>([]);
     const [loading, setLoading] = useState(true);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
-    // Estado para el drag and drop nativo
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -182,13 +176,14 @@ export default function CreateProduct() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Crear Producto" />
-            <div className="min-h-screen flex items-center justify-center bg-black">
-                <div className="w-full max-w-2xl p-6 bg-gray-800 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-semibold text-center text-white mb-6">Crear Producto</h2>
+            <div className="flex min-h-screen items-center justify-center bg-black">
+                <div className="w-full max-w-4xl bg-gray-800 rounded-lg shadow-md overflow-hidden">
                     {loading ? (
                         <Spinner />
                     ) : (
-                        <form onSubmit={handleSubmit} encType="multipart/form-data">
+                        <>
+                        <form onSubmit={handleSubmit} encType="multipart/form-data" className="p-6">
+                        <h2 className="text-2xl font-semibold text-center text-white mb-6">Crear Producto</h2>
                             <div className="mb-4">
                                 <label htmlFor="name" className="block text-sm font-medium text-gray-300">Nombre</label>
                                 <input
@@ -336,6 +331,7 @@ export default function CreateProduct() {
                                 </button>
                             </div>
                         </form>
+                        </>
                     )}
                 </div>
             </div>

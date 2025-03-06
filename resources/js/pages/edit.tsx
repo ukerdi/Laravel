@@ -367,115 +367,128 @@ export default function EditProduct(props: EditProductProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Editar Producto" />
-            <div className="min-h-screen flex items-center justify-center bg-black">
-                <div className="w-full max-w-4xl p-6 bg-gray-800 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-semibold text-center text-white mb-6">Editar Producto</h2>
-                    
+            <div className="min-h-screen py-4 px-3 sm:px-6 bg-black">
+                <div className="w-full max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-md overflow-hidden">
                     {loading ? (
-                            <Spinner/>
+                        <div>
+                            <Spinner />
+                        </div>
                     ) : (
-                        <form onSubmit={handleSubmit} encType="multipart/form-data">
-                            <div className="mb-4">
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-300">Nombre</label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                                />
-                                {errors.name && <div className="text-red-500 text-sm mt-1">{errors.name}</div>}
-                            </div>
-                            <div className="mb-4">
-                                <label htmlFor="description" className="block text-sm font-medium text-gray-300">Descripción</label>
-                                <textarea
-                                    id="description"
-                                    value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                                />
-                                {errors.description && <div className="text-red-500 text-sm mt-1">{errors.description}</div>}
-                            </div>
-                            <div className="mb-4">
-                                <label htmlFor="price" className="block text-sm font-medium text-gray-300">Precio</label>
-                                <input
-                                    type="number"
-                                    id="price"
-                                    value={data.price}
-                                    onChange={(e) => setData('price', e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                                />
-                                {errors.price && <div className="text-red-500 text-sm mt-1">{errors.price}</div>}
-                            </div>
-                            <div className="mb-4">
-                                <label htmlFor="stock" className="block text-sm font-medium text-gray-300">Stock</label>
-                                <input
-                                    type="number"
-                                    id="stock"
-                                    value={data.stock}
-                                    onChange={(e) => setData('stock', e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                                />
-                                {errors.stock && <div className="text-red-500 text-sm mt-1">{errors.stock}</div>}
-                            </div>
-                            <div className="mb-4">
-                                <label htmlFor="tipo_id" className="block text-sm font-medium text-gray-300">Tipo de Producto</label>
-                                <select
-                                    id="tipo_id"
-                                    value={data.tipo_id}
-                                    onChange={(e) => setData('tipo_id', e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                                >
-                                    <option value="">Seleccionar tipo</option>
-                                    {tipos.map((tipo) => (
-                                        <option key={tipo.id} value={tipo.id}>
-                                            {tipo.nombre}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.tipo_id && <div className="text-red-500 text-sm mt-1">{errors.tipo_id}</div>}
-                            </div>
-                            <div className="mb-4">
-                                <label htmlFor="images" className="block text-sm font-medium text-gray-300">Imágenes</label>
-                                <div className="mt-1 p-4 border-2 border-dashed border-gray-600 rounded-md">
-                                    <div className="flex justify-center">
-                                        <label className="cursor-pointer bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md transition duration-300">
-                                            <span>Seleccionar imágenes</span>
-                                            <input
-                                                type="file"
-                                                id="images"
-                                                onChange={handleImageChange}
-                                                className="hidden"
-                                                multiple
-                                                accept="image/*"
-                                            />
-                                        </label>
-                                    </div>
-                                    <p className="text-xs text-gray-400 text-center mt-2">
-                                        Puedes seleccionar múltiples imágenes. Arrastra para reordenar.
-                                    </p>
+                        <form onSubmit={handleSubmit} encType="multipart/form-data" className="p-4 sm:p-6">
+                            <h2 className="text-xl sm:text-2xl font-semibold text-center text-white py-4 px-4 sm:px-6 border-b border-gray-700">
+                                Editar Producto
+                            </h2>
+                            <div className="space-y-4 sm:space-y-6">
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-300">Nombre</label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        value={data.name}
+                                        onChange={(e) => setData('name', e.target.value)}
+                                        className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                    />
+                                    {errors.name && <div className="text-red-500 text-sm mt-1">{errors.name}</div>}
                                 </div>
-                                {errors.images && <div className="text-red-500 text-sm mt-1">{errors.images}</div>}
+                                
+                                <div>
+                                    <label htmlFor="description" className="block text-sm font-medium text-gray-300">Descripción</label>
+                                    <textarea
+                                        id="description"
+                                        value={data.description}
+                                        onChange={(e) => setData('description', e.target.value)}
+                                        className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white min-h-[100px]"
+                                    />
+                                    {errors.description && <div className="text-red-500 text-sm mt-1">{errors.description}</div>}
+                                </div>
+                                
+                                {/* Fila de precio y stock para pantallas medianas y grandes */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label htmlFor="price" className="block text-sm font-medium text-gray-300">Precio</label>
+                                        <input
+                                            type="number"
+                                            id="price"
+                                            value={data.price}
+                                            onChange={(e) => setData('price', e.target.value)}
+                                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                        />
+                                        {errors.price && <div className="text-red-500 text-sm mt-1">{errors.price}</div>}
+                                    </div>
+                                    
+                                    <div>
+                                        <label htmlFor="stock" className="block text-sm font-medium text-gray-300">Stock</label>
+                                        <input
+                                            type="number"
+                                            id="stock"
+                                            value={data.stock}
+                                            onChange={(e) => setData('stock', e.target.value)}
+                                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                        />
+                                        {errors.stock && <div className="text-red-500 text-sm mt-1">{errors.stock}</div>}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label htmlFor="tipo_id" className="block text-sm font-medium text-gray-300">Tipo de Producto</label>
+                                    <select
+                                        id="tipo_id"
+                                        value={data.tipo_id}
+                                        onChange={(e) => setData('tipo_id', e.target.value)}
+                                        className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                    >
+                                        <option value="">Seleccionar tipo</option>
+                                        {tipos.map((tipo) => (
+                                            <option key={tipo.id} value={tipo.id}>
+                                                {tipo.nombre}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.tipo_id && <div className="text-red-500 text-sm mt-1">{errors.tipo_id}</div>}
+                                </div>
+                                
+                                <div>
+                                    <label htmlFor="images" className="block text-sm font-medium text-gray-300">Imágenes</label>
+                                    <div className="mt-1 p-3 sm:p-4 border-2 border-dashed border-gray-600 rounded-md">
+                                        <div className="flex justify-center">
+                                            <label className="cursor-pointer bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 sm:px-4 rounded-md transition duration-300">
+                                                <span>Seleccionar imágenes</span>
+                                                <input
+                                                    type="file"
+                                                    id="images"
+                                                    onChange={handleImageChange}
+                                                    className="hidden"
+                                                    multiple
+                                                    accept="image/*"
+                                                />
+                                            </label>
+                                        </div>
+                                        <p className="text-xs text-gray-400 text-center mt-2">
+                                            Puedes seleccionar múltiples imágenes.
+                                        </p>
+                                    </div>
+                                    {errors.images && <div className="text-red-500 text-sm mt-1">{errors.images}</div>}
+                                </div>
                                 
                                 {/* Imágenes actuales arrastrables */}
                                 {data.currentImages && data.currentImages.length > 0 && (
-                                    <div className="mt-6">
+                                    <div className="mt-4 sm:mt-6">
                                         <h3 className="text-sm font-medium text-gray-300 mb-2">Imágenes actuales</h3>
-                                        <p className="text-xs text-gray-400 mb-4">
+                                        <p className="text-xs text-gray-400 mb-3">
                                             <span className="inline-flex items-center">
                                                 <Move className="w-4 h-4 mr-1" /> 
-                                                Arrastra las imágenes para reordenarlas. La primera imagen será la principal.
+                                                Arrastra para reordenar. La primera será la principal.
                                             </span>
                                         </p>
                                         
-                                        <div className="flex flex-wrap gap-4">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                             {data.imagesOrder.map((originalIndex, currentIndex) => {
                                                 const image = data.currentImages[originalIndex];
-                                                if (!image) return null; // Protección contra índices no válidos
+                                                if (!image) return null;
                                                 return (
                                                     <div
                                                         key={`current-${originalIndex}-${currentIndex}`}
-                                                        className={`relative w-28 h-28 rounded-lg overflow-hidden border ${
+                                                        className={`relative aspect-square rounded-lg overflow-hidden border ${
                                                             dragOverCurrentIndex === currentIndex ? 'border-indigo-500' : 'border-gray-600'
                                                         }`}
                                                         draggable
@@ -520,22 +533,23 @@ export default function EditProduct(props: EditProductProps) {
                                         </div>
                                     </div>
                                 )}
+                                
                                 {/* Nuevas imágenes arrastrables */}
                                 {data.images.length > 0 && (
-                                    <div className="mt-6">
+                                    <div className="mt-4 sm:mt-6">
                                         <h3 className="text-sm font-medium text-gray-300 mb-2">Nuevas imágenes</h3>
-                                        <p className="text-xs text-gray-400 mb-4">
+                                        <p className="text-xs text-gray-400 mb-3">
                                             <span className="inline-flex items-center">
                                                 <Move className="w-4 h-4 mr-1" /> 
-                                                Arrastra las imágenes para reordenarlas.
+                                                Arrastra para reordenar.
                                             </span>
                                         </p>
                                         
-                                        <div className="flex flex-wrap gap-4">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                             {data.images.map((image, index) => (
                                                 <div
                                                     key={`new-${index}`}
-                                                    className={`relative w-28 h-28 rounded-lg overflow-hidden border ${
+                                                    className={`relative aspect-square rounded-lg overflow-hidden border ${
                                                         dragOverNewIndex === index ? 'border-indigo-500' : 'border-gray-600'
                                                     }`}
                                                     draggable
@@ -571,17 +585,18 @@ export default function EditProduct(props: EditProductProps) {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex justify-end gap-4">
+                            
+                            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 mt-6">
                                 <button
                                     type="button"
-                                    className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                                    className="order-2 sm:order-1 py-2.5 sm:px-6 w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                                     onClick={() => router.visit('/dashboard')}
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
+                                    className="order-1 sm:order-2 py-2.5 sm:px-6 w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                                     disabled={processing}
                                 >
                                     {processing ? 'Guardando...' : 'Guardar Cambios'}

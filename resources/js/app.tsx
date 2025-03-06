@@ -15,7 +15,15 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
-    resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
+    // Reemplazar este resolve con el mejorado para manejar subdirectorios
+    resolve: (name) => {
+        // Soporte para formato jerárquico auth/reset-password
+        const parts = name.split('/');
+        if (parts.length > 1) {
+            return resolvePageComponent(`./pages/${parts.join('/')}.tsx`, import.meta.glob('./pages/**/*.tsx'));
+        }
+        return resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx'));
+    },
     setup({ el, App, props }) {
         const root = createRoot(el);
 
@@ -30,4 +38,6 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+// Inicializar el tema después de que la aplicación esté configurada
 initializeTheme();
