@@ -220,10 +220,12 @@ export default function Dashboard() {
                         <Spinner />
                     ) : (
                         <>
-                            <div className="flex justify-between items-center mb-6">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                                 <h1 className="text-4xl font-bold text-white">Gestión de Tienda</h1>
-                                <div className="flex space-x-4">
-                                    <div className="flex flex-col">
+                                
+                                {/* Contenedor de filtros responsivo */}
+                                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                                    <div className="flex flex-col w-full sm:w-auto">
                                         <label htmlFor="type" className="block text-sm font-medium text-gray-300">Tipo</label>
                                         <select 
                                             id="type" 
@@ -241,7 +243,7 @@ export default function Dashboard() {
                                             }
                                         </select>
                                     </div>
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col w-full sm:w-auto">
                                         <label htmlFor="searchName" className="block text-sm font-medium text-gray-300">Buscar por nombre</label>
                                         <input 
                                             type="text" 
@@ -253,7 +255,6 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                             </div>
-                            
                             {/* Información de paginación en formato texto */}
                             <div className="flex justify-between items-center mb-4">
                                 <p className="text-gray-400 text-sm">
