@@ -40,8 +40,14 @@ Route::middleware('api')->group(function () {
     // Type routes
     Route::get('tipos', [TipoController::class, 'index']);
     
+    // Rutas de autenticación
     Route::post('/login', [RegisteredClientController::class, 'login']);
     Route::post('/register', [RegisteredClientController::class, 'register']);
+    
+    // Rutas de recuperación de contraseña
+    Route::post('/password/email', [RegisteredClientController::class, 'sendResetLinkEmail']);
+    Route::post('/password/code/verify', [RegisteredClientController::class, 'verifyResetCode']);
+    Route::post('/password/reset', [RegisteredClientController::class, 'resetPassword']);
 });
 
 // Protected routes
@@ -50,6 +56,6 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::get('/user/profile', [RegisteredClientController::class, 'getProfile']);
     Route::put('/user/profile', [RegisteredClientController::class, 'updateProfile']);
-
 });

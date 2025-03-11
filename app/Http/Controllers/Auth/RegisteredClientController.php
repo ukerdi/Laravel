@@ -8,6 +8,11 @@ use App\Models\Client;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordMail;
 
 class RegisteredClientController extends Controller
 {
@@ -143,14 +148,44 @@ class RegisteredClientController extends Controller
         }
     }
 
+/**
+     * Get authenticated user profile
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
 
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'city' => $user->city,
+                'state' => $user->state,
+                'postal_code' => $user->postal_code
+            ]
+        ]);
+    }
+    
     /**
      * Update client profile
      * 
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    
     public function updateProfile(Request $request)
     {
         $user = $request->user();
@@ -162,7 +197,7 @@ class RegisteredClientController extends Controller
             ], 401);
         }
 
-        // Validar los datos de la solicitud
+        // Validar datos
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|max:255|unique:clients,email,'.$user->id,
@@ -195,25 +230,39 @@ class RegisteredClientController extends Controller
                         ]
                     ], 422);
                 }
-            }
-
-            // Actualizar los campos del usuario
-            $fieldsToUpdate = [
-                'name', 'email', 'phone', 'address', 'city', 'state', 'postal_code'
-            ];
-
-            foreach ($fieldsToUpdate as $field) {
-                if ($request->has($field)) {
-                    $user->{$field} = $request->{$field};
-                }
-            }
-
-            // Actualizar contraseña si se proporcionó una nueva
-            if ($request->has('new_password') && $request->filled('new_password')) {
+                
                 $user->password = Hash::make($request->new_password);
             }
 
-            // Guardar cambios
+            // Actualizar otros campos
+            if ($request->has('name')) {
+                $user->name = $request->name;
+            }
+            
+            if ($request->has('email')) {
+                $user->email = $request->email;
+            }
+            
+            if ($request->has('phone')) {
+                $user->phone = $request->phone;
+            }
+            
+            if ($request->has('address')) {
+                $user->address = $request->address;
+            }
+            
+            if ($request->has('city')) {
+                $user->city = $request->city;
+            }
+            
+            if ($request->has('state')) {
+                $user->state = $request->state;
+            }
+            
+            if ($request->has('postal_code')) {
+                $user->postal_code = $request->postal_code;
+            }
+
             $user->save();
 
             return response()->json([
@@ -238,5 +287,203 @@ class RegisteredClientController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Send a reset link email to the user
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendResetLinkEmail(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email|exists:clients,email',
+    ], [
+        'email.exists' => 'No encontramos un usuario con ese correo electrónico.'
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validación fallida',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    try {
+        // Generar un código de 6 dígitos
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $email = $request->email;
+        
+        // Obtener el nombre del usuario
+        $client = Client::where('email', $email)->first();
+        $userName = $client ? $client->name : null;
+        
+        // Generar token para validación
+        $token = Str::random(60);
+        
+        // Almacenar token y código en la tabla password_resets
+        DB::table('password_resets')->where('email', $email)->delete();
+        DB::table('password_resets')->insert([
+            'email' => $email,
+            'token' => Hash::make($token),
+            'code' => $code,
+            'created_at' => Carbon::now()
+        ]);
+        
+        try {
+            \Log::info("Intentando enviar email a: {$email} con código: {$code}");
+            
+            // Activa el envío real de email
+            Mail::to($email)->send(new ResetPasswordMail($code, $userName));
+            
+            \Log::info("Email enviado exitosamente");
+        } catch (\Exception $e) {
+            \Log::error("Error al enviar email: " . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            // Continuar el flujo aunque falle el email (para desarrollo)
+        }
+        
+        // Para producción, elimina la línea 'code' => $code
+        return response()->json([
+            'success' => true,
+            'message' => 'Hemos enviado un código de verificación a tu correo electrónico.',
+            'token' => $token,
+            'code' => $code // Solo para desarrollo
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error general: ' . $e->getMessage());
+        \Log::error($e->getTraceAsString());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'No se pudo procesar la solicitud de recuperación.',
+            'error' => config('app.debug') ? $e->getMessage() : 'Error interno del servidor'
+        ], 500);
+    }
+}
+    /**
+     * Verify reset password code
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verifyResetCode(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'code' => 'required|string',
+            'token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validación fallida',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $resetRecord = DB::table('password_resets')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$resetRecord) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró solicitud de restablecimiento para este email.'
+            ], 404);
+        }
+
+        // Verificar expiración (1 hora)
+        if (Carbon::parse($resetRecord->created_at)->addHour()->isPast()) {
+            DB::table('password_resets')->where('email', $request->email)->delete();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'El código ha expirado. Solicita un nuevo código de restablecimiento.'
+            ], 401);
+        }
+
+        // Verificar código
+        if ($resetRecord->code !== $request->code) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Código de verificación incorrecto.'
+            ], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Código verificado correctamente.',
+            'token' => $request->token
+        ]);
+    }
+
+    /**
+     * Reset user password
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'token' => 'required|string',
+            'password' => 'required|min:8',
+            'password_confirmation' => 'required|same:password',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validación fallida',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $resetRecord = DB::table('password_resets')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$resetRecord) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró solicitud de restablecimiento para este email.'
+            ], 404);
+        }
+
+        // Verificar expiración (1 hora)
+        if (Carbon::parse($resetRecord->created_at)->addHour()->isPast()) {
+            DB::table('password_resets')->where('email', $request->email)->delete();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'El enlace ha expirado. Solicita un nuevo restablecimiento.'
+            ], 401);
+        }
+
+        $client = Client::where('email', $request->email)->first();
+
+        if (!$client) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró usuario con ese email.'
+            ], 404);
+        }
+
+        // Actualizar contraseña
+        $client->password = Hash::make($request->password);
+        $client->save();
+
+        // Eliminar registro de restablecimiento
+        DB::table('password_resets')->where('email', $request->email)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contraseña restablecida correctamente.'
+        ]);
     }
 }
