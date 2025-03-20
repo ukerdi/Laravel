@@ -26,7 +26,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Ventas',
         url: '/ventas',
-        icon: ShoppingCart,  // Se podría usar otro ícono para ventas si se prefiere
+        icon: ShoppingCart, 
     },
     {
         title: 'Marketing',

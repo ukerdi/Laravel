@@ -6,7 +6,9 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\TipoController;
 use App\Http\Controllers\Auth\RegisteredClientController;
+use App\Http\Controllers\VentasController; // Añadir este controlador
 use App\Models\Product;
+use App\Http\Controllers\CompraController;
 
 // API routes with proper middleware
 Route::middleware('api')->group(function () {
@@ -48,6 +50,18 @@ Route::middleware('api')->group(function () {
     Route::post('/password/email', [RegisteredClientController::class, 'sendResetLinkEmail']);
     Route::post('/password/code/verify', [RegisteredClientController::class, 'verifyResetCode']);
     Route::post('/password/reset', [RegisteredClientController::class, 'resetPassword']);
+    
+    // Rutas para compras
+    Route::post('/compras', [CompraController::class, 'store']);
+    // Nuevas rutas para el sistema de factura/confirmación
+    Route::post('/compras/preview', [CompraController::class, 'preview']);
+    Route::post('/compras/confirm', [CompraController::class, 'confirm']);
+    Route::post('/compras/enviar-correo', [CompraController::class, 'enviarCorreoFactura']);
+    
+    // Rutas para ventas API
+    Route::get('/ventas', [VentasController::class, 'index']);
+    Route::get('/ventas/{id}', [VentasController::class, 'show']);
+    Route::get('/ventas-reportes', [VentasController::class, 'reportes']);
 });
 
 // Protected routes
